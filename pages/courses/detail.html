@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title id="pageTitle">Course Details - BigStudy</title>
+  <meta name="description" content="View course details, eligibility, career prospects and colleges offering this course.">
+  <link rel="stylesheet" href="/public/css/styles.css">
+  <style>
+    .course-hero {
+      background: linear-gradient(135deg, #3B1F8C 0%, #6236C8 100%);
+      color: white; padding: 3rem 0 2rem;
+    }
+    .course-hero-inner { display: flex; gap: 2rem; align-items: flex-start; flex-wrap: wrap; }
+    .course-icon {
+      width: 90px; height: 90px; border-radius: 16px;
+      background: rgba(255,255,255,0.15);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 3rem; flex-shrink: 0;
+      border: 2px solid rgba(255,255,255,0.3);
+    }
+    .course-hero-info { flex: 1; }
+    .course-hero-info h1 { font-size: 1.9rem; margin-bottom: 0.5rem; }
+    .course-meta { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 0.75rem; opacity: 0.9; font-size: 0.9rem; }
+    .tag-white {
+      background: rgba(255,255,255,0.2); color: white;
+      padding: 0.3rem 0.9rem; border-radius: 20px;
+      font-size: 0.85rem; font-weight: 600;
+    }
+    .stats-bar { background: white; border-bottom: 1px solid #eee; padding: 1.5rem 0; }
+    .stats-bar-inner { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+    .stat-item { text-align: center; }
+    .stat-value { font-size: 1.8rem; font-weight: 800; color: #3B1F8C; }
+    .stat-label { font-size: 0.82rem; color: #666; margin-top: 0.15rem; }
+    .detail-layout { display: grid; grid-template-columns: 1fr 320px; gap: 2rem; padding: 2rem 0; }
+    .detail-card { background: white; border-radius: 12px; padding: 1.75rem; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 1.5rem; }
+    .detail-card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 1.25rem; padding-bottom: 0.75rem; border-bottom: 2px solid #f0f0f0; }
+    .sidebar-card { background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 1.25rem; }
+    .sidebar-card h4 { font-size: 1rem; font-weight: 700; margin-bottom: 1rem; }
+    .info-row { display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 0; border-bottom: 1px solid #f5f5f5; font-size: 0.9rem; }
+    .info-row:last-child { border-bottom: none; }
+    .info-row .label { color: #777; }
+    .info-row .value { font-weight: 600; color: #333; text-align: right; }
+    .career-tag {
+      display: inline-block; background: #f0ebff; color: #3B1F8C;
+      padding: 0.4rem 0.85rem; border-radius: 20px;
+      font-size: 0.82rem; font-weight: 600; margin: 0.25rem;
+    }
+    .college-result-card {
+      display: flex; align-items: center; gap: 1rem;
+      padding: 1rem; border: 1px solid #eee; border-radius: 10px;
+      margin-bottom: 0.75rem; transition: box-shadow 0.2s; cursor: pointer;
+    }
+    .college-result-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .college-mini-logo {
+      width: 44px; height: 44px; border-radius: 8px;
+      background: linear-gradient(135deg, var(--primary), #0f3028);
+      color: white; font-weight: 800; font-size: 0.95rem;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    @media (max-width: 900px) {
+      .detail-layout { grid-template-columns: 1fr; }
+      .stats-bar-inner { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <nav class="navbar">
+        <a href="/" class="navbar-brand"><span style="color:var(--cta);">B</span>igStudy</a>
+        <ul class="navbar-menu" id="navMenu">
+          <li><a href="/pages/colleges/index.html" class="nav-link">Colleges</a></li>
+          <li><a href="/pages/courses/index.html" class="nav-link active">Courses</a></li>
+          <li><a href="/pages/exams/index.html" class="nav-link">Exams</a></li>
+        </ul>
+        <div class="navbar-actions">
+          <a href="/pages/auth/signin.html" class="btn btn-secondary btn-sm">Sign In</a>
+          <a href="/pages/auth/signup.html" class="btn btn-cta btn-sm">Get Started</a>
+          <button class="nav-toggle" id="navToggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Course Hero -->
+  <section class="course-hero" id="courseHero" style="display:none;">
+    <div class="container">
+      <a href="/pages/courses/index.html" style="color:rgba(255,255,255,0.7); font-size:0.9rem; display:inline-block; margin-bottom:1rem;">← Back to Courses</a>
+      <div class="course-hero-inner">
+        <div class="course-icon" id="courseIcon">📚</div>
+        <div class="course-hero-info">
+          <div id="courseCodeBadge" style="display:none; margin-bottom:0.5rem;">
+            <span class="tag-white" id="courseCode"></span>
+          </div>
+          <h1 id="courseName">Loading...</h1>
+          <div class="course-meta">
+            <span id="courseStream">🎓 —</span>
+            <span id="courseLevel">📋 —</span>
+            <span id="courseDuration">⏱ —</span>
+            <span id="courseRating">⭐ —</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats Bar -->
+  <section class="stats-bar" id="statsBar" style="display:none;">
+    <div class="container">
+      <div class="stats-bar-inner">
+        <div class="stat-item">
+          <div class="stat-value" id="statDuration">—</div>
+          <div class="stat-label">Duration (months)</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="statAvgFees">—</div>
+          <div class="stat-label">Avg Annual Fees</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="statStream">—</div>
+          <div class="stat-label">Stream</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="statRating">—</div>
+          <div class="stat-label">Rating</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <section class="section" style="padding-top:2rem;">
+    <div class="container">
+      <div id="loadingState" style="text-align:center; padding:4rem 0;">
+        <div style="font-size:2rem; margin-bottom:1rem;">⏳</div>
+        <p style="color:#666;">Loading course details...</p>
+      </div>
+
+      <div id="mainContent" class="detail-layout" style="display:none;">
+        <!-- LEFT -->
+        <div>
+          <div class="detail-card">
+            <h3>📖 About This Course</h3>
+            <p id="courseDescription" style="color:#555; line-height:1.8;"></p>
+          </div>
+
+          <div class="detail-card" id="eligCard" style="display:none;">
+            <h3>✅ Eligibility Criteria</h3>
+            <p id="eligText" style="color:#555; line-height:1.8;"></p>
+          </div>
+
+          <div class="detail-card">
+            <h3>🚀 Career Prospects</h3>
+            <div id="careerTags" style="margin-bottom:1rem;"></div>
+            <p id="careerText" style="color:#555; line-height:1.8; font-size:0.95rem;"></p>
+          </div>
+
+          <div class="detail-card">
+            <h3>🏫 Colleges Offering This Course</h3>
+            <p style="color:#777; font-size:0.88rem; margin-bottom:1rem;">Sign in to see the full list with fees, cutoffs and more.</p>
+            <div id="collegesOfferingList">
+              <p style="color:#999; font-size:0.9rem;">Loading colleges...</p>
+            </div>
+            <a href="/pages/colleges/index.html" class="btn btn-secondary" style="margin-top:1rem; display:inline-block;">Browse All Colleges →</a>
+          </div>
+        </div>
+
+        <!-- RIGHT SIDEBAR -->
+        <div>
+          <div class="sidebar-card" style="background: linear-gradient(135deg,#3B1F8C,#6236C8); color:white; text-align:center;">
+            <h4 style="color:white; margin-bottom:0.5rem;">🎓 Ready to Enroll?</h4>
+            <p style="color:rgba(255,255,255,0.8); font-size:0.88rem; margin-bottom:1.25rem;">Find colleges offering this course and apply directly.</p>
+            <a href="/pages/colleges/index.html" class="btn" style="background:white; color:#3B1F8C; font-weight:700; width:100%; display:block;">Find Colleges →</a>
+          </div>
+
+          <div class="sidebar-card">
+            <h4>📋 Quick Info</h4>
+            <div class="info-row">
+              <span class="label">Stream</span>
+              <span class="value" id="siStream">—</span>
+            </div>
+            <div class="info-row">
+              <span class="label">Level</span>
+              <span class="value" id="siLevel">—</span>
+            </div>
+            <div class="info-row">
+              <span class="label">Duration</span>
+              <span class="value" id="siDuration">—</span>
+            </div>
+            <div class="info-row" id="siFeesRow" style="display:none;">
+              <span class="label">Avg Fees/yr</span>
+              <span class="value" id="siFees">—</span>
+            </div>
+            <div class="info-row">
+              <span class="label">Rating</span>
+              <span class="value" id="siRating">—</span>
+            </div>
+          </div>
+
+          <div class="sidebar-card">
+            <h4>🔗 Related Exams</h4>
+            <div id="relatedExamsList">
+              <p style="color:#999; font-size:0.85rem;">Loading...</p>
+            </div>
+            <a href="/pages/exams/index.html" style="font-size:0.85rem; color:var(--primary);">View All Exams →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h4>BigStudy</h4>
+          <p>India's leading platform for college exploration and entrance exam guidance.</p>
+        </div>
+        <div class="footer-section">
+          <h4>Quick Links</h4>
+          <ul>
+            <li><a href="/pages/colleges/index.html">Colleges</a></li>
+            <li><a href="/pages/courses/index.html">Courses</a></li>
+            <li><a href="/pages/exams/index.html">Exams</a></li>
+            <li><a href="/pages/dashboard/index.html">Dashboard</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom"><p>&copy; 2025 BigStudy. All rights reserved.</p></div>
+    </div>
+  </footer>
+
+  <script src="/public/js/supabase-client.js"></script>
+  <script src="/public/js/utils.js"></script>
+  <script>
+    const _nt=document.getElementById('navToggle'),_nm=document.getElementById('navMenu');
+    if(_nt&&_nm){_nt.addEventListener('click',()=>{_nt.classList.toggle('open');_nm.classList.toggle('open');});document.addEventListener('click',(e)=>{if(!_nt.contains(e.target)&&!_nm.contains(e.target)){_nt.classList.remove('open');_nm.classList.remove('open');}});}
+
+    const params = new URLSearchParams(window.location.search);
+    const courseId = params.get('id');
+
+    const streamIcons = {
+      'Engineering': '⚙️', 'Medical': '🏥', 'Management': '💼', 'Management & Commerce': '💼',
+      'Law': '⚖️', 'Arts & Humanities': '🎨', 'Science': '🔬', 'Commerce': '📊'
+    };
+
+    async function loadCourseDetail() {
+      if (!courseId) { navigateTo('/pages/courses/index.html'); return; }
+      try {
+        const course = await BigStudyAPI.getCourseById(courseId);
+        if (!course) {
+          document.getElementById('loadingState').innerHTML = '<div style="text-align:center;padding:4rem 0;"><div style="font-size:3rem">😕</div><h3>Course not found</h3><a href="/pages/courses/index.html" class="btn btn-primary" style="margin-top:1rem;">Browse Courses</a></div>';
+          return;
+        }
+        populatePage(course);
+        await loadCollegesOffering(course.stream);
+        await loadRelatedExams(course.stream);
+        document.getElementById('loadingState').style.display = 'none';
+        document.getElementById('courseHero').style.display = 'block';
+        document.getElementById('statsBar').style.display = 'block';
+        document.getElementById('mainContent').style.display = 'grid';
+      } catch (err) {
+        console.error('[v0] Course load error:', err);
+        document.getElementById('loadingState').innerHTML = '<p style="color:#999;">Failed to load. <a href="/pages/courses/index.html">Go back</a></p>';
+      }
+    }
+
+    function populatePage(c) {
+      document.title = `${c.name} - BigStudy`;
+      const icon = streamIcons[c.stream] || '📚';
+      document.getElementById('courseIcon').textContent = icon;
+      document.getElementById('courseName').textContent = c.name;
+      if (c.code) {
+        document.getElementById('courseCodeBadge').style.display = 'block';
+        document.getElementById('courseCode').textContent = c.code;
+      }
+      document.getElementById('courseStream').textContent = icon + ' ' + (c.stream || '—');
+      document.getElementById('courseLevel').textContent = '📋 ' + (c.qualification_level || '—');
+      document.getElementById('courseDuration').textContent = c.duration_months ? `⏱ ${c.duration_months} months` : '';
+      document.getElementById('courseRating').textContent = c.rating ? `⭐ ${parseFloat(c.rating).toFixed(1)} (${c.review_count || 0} reviews)` : '';
+
+      // Stats bar
+      document.getElementById('statDuration').textContent = c.duration_months || '—';
+      document.getElementById('statAvgFees').textContent = c.avg_fees ? '₹' + (parseFloat(c.avg_fees)/100000).toFixed(1) + 'L' : '—';
+      document.getElementById('statStream').textContent = c.stream || '—';
+      document.getElementById('statRating').textContent = c.rating ? parseFloat(c.rating).toFixed(1) + '⭐' : '—';
+
+      // About
+      const defaultDesc = `${c.name} is a ${c.qualification_level || ''} program in the ${c.stream} stream with a duration of ${c.duration_months ? c.duration_months + ' months' : 'N/A'}. It equips students with in-depth knowledge and practical skills required for a successful career in the field.`;
+      document.getElementById('courseDescription').textContent = c.description || defaultDesc;
+
+      // Eligibility
+      if (c.eligibility_criteria) {
+        document.getElementById('eligCard').style.display = 'block';
+        document.getElementById('eligText').textContent = c.eligibility_criteria;
+      }
+
+      // Career prospects
+      const careerKeywords = getCareerKeywords(c.stream);
+      document.getElementById('careerTags').innerHTML = careerKeywords.map(k => `<span class="career-tag">${k}</span>`).join('');
+      document.getElementById('careerText').textContent = c.career_prospects || `Graduates in ${c.name} can pursue careers in ${careerKeywords.slice(0,3).join(', ')} and many other growing sectors across India and globally.`;
+
+      // Sidebar
+      document.getElementById('siStream').textContent = c.stream || '—';
+      document.getElementById('siLevel').textContent = c.qualification_level || '—';
+      document.getElementById('siDuration').textContent = c.duration_months ? c.duration_months + ' months' : '—';
+      if (c.avg_fees) {
+        document.getElementById('siFeesRow').style.display = 'flex';
+        document.getElementById('siFees').textContent = '₹' + parseFloat(c.avg_fees).toLocaleString('en-IN');
+      }
+      document.getElementById('siRating').textContent = c.rating ? parseFloat(c.rating).toFixed(1) + ' / 5 ⭐' : '—';
+    }
+
+    function getCareerKeywords(stream) {
+      const map = {
+        'Engineering': ['Software Engineer', 'Data Scientist', 'Civil Engineer', 'Mechanical Engineer', 'Product Manager'],
+        'Medical': ['Doctor', 'Surgeon', 'Healthcare Admin', 'Medical Researcher', 'Pharmacist'],
+        'Management & Commerce': ['MBA', 'Finance Analyst', 'Marketing Manager', 'Consultant', 'Entrepreneur'],
+        'Law': ['Advocate', 'Legal Advisor', 'Judge', 'Corporate Lawyer', 'Public Prosecutor'],
+        'Science': ['Research Scientist', 'Lecturer', 'Data Analyst', 'Lab Technician', 'Biotechnologist'],
+        'Arts & Humanities': ['Civil Services', 'Journalist', 'Social Worker', 'Professor', 'Content Creator']
+      };
+      return map[stream] || ['Professional', 'Researcher', 'Consultant', 'Educator'];
+    }
+
+    async function loadCollegesOffering(stream) {
+      try {
+        const colleges = await BigStudyAPI.getColleges({}, 6, 0);
+        const container = document.getElementById('collegesOfferingList');
+        if (!colleges || colleges.length === 0) {
+          container.innerHTML = '<p style="color:#999;">College list will be updated soon.</p>';
+          return;
+        }
+        container.innerHTML = colleges.slice(0,4).map(c => {
+          const abbr = (c.abbreviation || c.name.split(' ').map(w=>w[0]).join('')).substring(0,2).toUpperCase();
+          const city = (c.city && c.city !== 'nan') ? c.city : '';
+          const state = (c.state && c.state !== 'nan') ? c.state : '';
+          const loc = [city, state].filter(Boolean).join(', ');
+          return `
+            <div class="college-result-card" onclick="navigateTo('/pages/colleges/detail.html?id=${c.id}')">
+              <div class="college-mini-logo">${abbr}</div>
+              <div style="flex:1;">
+                <div style="font-weight:700; font-size:0.9rem;">${c.name}</div>
+                ${loc ? `<div style="color:#888; font-size:0.82rem;">📍 ${loc}</div>` : ''}
+                ${c.nirf_rank ? `<div style="color:var(--primary); font-size:0.8rem; font-weight:600;">NIRF #${c.nirf_rank}</div>` : ''}
+              </div>
+              <span style="color:#ccc; font-size:1.2rem;">›</span>
+            </div>
+          `;
+        }).join('');
+      } catch (err) {
+        document.getElementById('collegesOfferingList').innerHTML = '<p style="color:#999; font-size:0.9rem;">Could not load colleges.</p>';
+      }
+    }
+
+    async function loadRelatedExams(stream) {
+      try {
+        const exams = await BigStudyAPI.getExams({});
+        const container = document.getElementById('relatedExamsList');
+        if (!exams || exams.length === 0) {
+          container.innerHTML = '<p style="color:#999; font-size:0.85rem;">No related exams found.</p>';
+          return;
+        }
+        container.innerHTML = exams.slice(0,4).map(e => `
+          <div style="padding:0.5rem 0; border-bottom:1px solid #f5f5f5; font-size:0.88rem;">
+            <div style="font-weight:700;">${e.name}</div>
+            <div style="color:#888; font-size:0.8rem;">${e.exam_type || ''}</div>
+          </div>
+        `).join('');
+      } catch {}
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadCourseDetail();
+      updateNavbarAuth();
+    });
+  </script>
+</body>
+</html>

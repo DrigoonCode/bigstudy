@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Colleges - BigStudy</title>
+  <link rel="stylesheet" href="/public/css/styles.css">
+</head>
+<body>
+  <!-- Navigation -->
+  <header>
+    <div class="container">
+      <nav class="navbar">
+        <a href="/" class="navbar-brand">
+          <span style="color:var(--cta);">B</span>igStudy
+        </a>
+
+        <ul class="navbar-menu" id="navMenu">
+          <li><a href="/pages/colleges/index.html" class="nav-link active">Colleges</a></li>
+          <li><a href="/pages/courses/index.html" class="nav-link">Courses</a></li>
+          <li><a href="/pages/exams/index.html" class="nav-link">Exams</a></li>
+        </ul>
+
+        <div class="navbar-actions">
+          <div class="search-box">
+            <input type="text" id="headerSearch" placeholder="Search colleges...">
+            <button type="button" onclick="handleHeaderSearch()">Search</button>
+          </div>
+          <a href="/pages/auth/signin.html" class="btn btn-secondary btn-sm">Sign In</a>
+          <a href="/pages/auth/signup.html" class="btn btn-cta btn-sm">Get Started</a>
+          <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
+            <span></span><span></span><span></span>
+          </button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <h1>Explore <span class="accent-text">Colleges</span></h1>
+      <p>Discover 3000+ colleges across India with detailed information about courses, fees, placements, and more.</p>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <section class="section">
+    <div class="container">
+      <div style="display: grid; grid-template-columns: 300px 1fr; gap: 2rem;">
+        
+        <!-- Filters Sidebar -->
+        <div>
+          <div class="filters">
+            <div class="filter-group">
+              <h3 class="filter-title">🔍 Filters</h3>
+            </div>
+            
+            <div class="filter-group">
+              <div class="filter-title">Premier Colleges</div>
+              <div class="filter-options">
+                <div class="filter-option">
+                  <input type="checkbox" id="premierFilter" name="premier" value="true" onchange="applyFilters()">
+                  <label for="premierFilter">Show Premier Colleges Only</label>
+                </div>
+              </div>
+            </div>
+            
+            <div class="filter-group">
+              <div class="filter-title">State</div>
+              <div class="filter-options">
+                <div class="filter-option">
+                  <input type="checkbox" id="stateMH" class="stateFilter" value="Maharashtra" onchange="applyFilters()">
+                  <label for="stateMH">Maharashtra</label>
+                </div>
+                <div class="filter-option">
+                  <input type="checkbox" id="stateDL" class="stateFilter" value="Delhi" onchange="applyFilters()">
+                  <label for="stateDL">Delhi</label>
+                </div>
+                <div class="filter-option">
+                  <input type="checkbox" id="stateKA" class="stateFilter" value="Karnataka" onchange="applyFilters()">
+                  <label for="stateKA">Karnataka</label>
+                </div>
+                <div class="filter-option">
+                  <input type="checkbox" id="stateTN" class="stateFilter" value="Tamil Nadu" onchange="applyFilters()">
+                  <label for="stateTN">Tamil Nadu</label>
+                </div>
+                <div class="filter-option">
+                  <input type="checkbox" id="stateUP" class="stateFilter" value="Uttar Pradesh" onchange="applyFilters()">
+                  <label for="stateUP">Uttar Pradesh</label>
+                </div>
+                <div class="filter-option">
+                  <input type="checkbox" id="stateHR" class="stateFilter" value="Haryana" onchange="applyFilters()">
+                  <label for="stateHR">Haryana</label>
+                </div>
+              </div>
+            </div>
+            
+            <div class="filter-group">
+              <div class="filter-title">Minimum Rating</div>
+              <div class="filter-options">
+                <div class="filter-option">
+                  <input type="radio" name="rating" value="4.5" id="rating45" onchange="applyFilters()">
+                  <label for="rating45">4.5+ Stars</label>
+                </div>
+                <div class="filter-option">
+                  <input type="radio" name="rating" value="4" id="rating4" onchange="applyFilters()">
+                  <label for="rating4">4+ Stars</label>
+                </div>
+                <div class="filter-option">
+                  <input type="radio" name="rating" value="3.5" id="rating35" onchange="applyFilters()">
+                  <label for="rating35">3.5+ Stars</label>
+                </div>
+                <div class="filter-option">
+                  <input type="radio" name="rating" value="" id="ratingAll" checked onchange="applyFilters()">
+                  <label for="ratingAll">All Ratings</label>
+                </div>
+              </div>
+            </div>
+            
+            <div style="display: flex; gap: 0.5rem; margin-top: 1.5rem;">
+              <button class="btn btn-primary btn-sm" style="flex: 1;" onclick="applyFilters()">Apply</button>
+              <button class="btn btn-secondary btn-sm" style="flex: 1;" onclick="clearFilters()">Reset</button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Colleges List -->
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <p id="collegeCount" style="color: #666;">Loading colleges...</p>
+            <select id="sortSelect" onchange="handleSort()" style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px;">
+              <option value="">Sort By</option>
+              <option value="rating">Rating (High to Low)</option>
+              <option value="rank">NIRF Rank (Best First)</option>
+              <option value="name">Name (A to Z)</option>
+            </select>
+          </div>
+          
+          <div id="collegesList" class="grid grid-2">
+            <!-- Colleges loaded here -->
+          </div>
+          
+          <!-- Pagination -->
+          <div id="pagination" style="display: flex; justify-content: center; gap: 1rem; margin-top: 2rem;">
+            <!-- Pagination controls -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h4>About BigStudy</h4>
+          <p>BigStudy is India's leading platform for college exploration, course discovery, and entrance exam preparation.</p>
+        </div>
+        <div class="footer-section">
+          <h4>Explore</h4>
+          <ul>
+            <li><a href="/pages/colleges/index.html">Colleges</a></li>
+            <li><a href="/pages/courses/index.html">Courses</a></li>
+            <li><a href="/pages/exams/index.html">Entrance Exams</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h4>Support</h4>
+          <ul>
+            <li><a href="/pages/legal/privacy.html">Privacy Policy</a></li>
+            <li><a href="/pages/legal/terms.html">Terms & Conditions</a></li>
+            <li><a href="/pages/legal/contact.html">Contact Us</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2025 BigStudy. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/public/js/supabase-client.js"></script>
+  <script src="/public/js/utils.js"></script>
+  <script>
+    const _nt=document.getElementById('navToggle'),_nm=document.getElementById('navMenu');
+    if(_nt&&_nm){_nt.addEventListener('click',()=>{_nt.classList.toggle('open');_nm.classList.toggle('open');});document.addEventListener('click',(e)=>{if(!_nt.contains(e.target)&&!_nm.contains(e.target)){_nt.classList.remove('open');_nm.classList.remove('open');}});}
+  </script>
+  <script>
+    let allColleges = [];
+    let filteredColleges = [];
+    let currentPage = 1;
+    const itemsPerPage = 12;
+    let currentSort = '';
+    let currentSearch = '';
+
+    // Get search query from URL
+    const params = new URLSearchParams(window.location.search);
+    currentSearch = params.get('search') || '';
+    
+    if (currentSearch) {
+      getElement('#headerSearch').value = currentSearch;
+    }
+
+    async function loadColleges() {
+      try {
+        showLoading('#collegesList');
+        const colleges = await BigStudyAPI.getColleges({}, 1000);
+        allColleges = colleges;
+        filteredColleges = colleges;
+        
+        // Apply search if present
+        if (currentSearch) {
+          filteredColleges = allColleges.filter(c => 
+            c.name.toLowerCase().includes(currentSearch.toLowerCase()) ||
+            c.city.toLowerCase().includes(currentSearch.toLowerCase())
+          );
+        }
+        
+        displayColleges();
+        hideLoading('#collegesList');
+      } catch (error) {
+        console.error('[v0] Error loading colleges:', error);
+        showError('Failed to load colleges');
+        hideLoading('#collegesList');
+      }
+    }
+
+    function displayColleges() {
+      const start = (currentPage - 1) * itemsPerPage;
+      const end = start + itemsPerPage;
+      const pageColleges = filteredColleges.slice(start, end);
+      
+      if (pageColleges.length === 0) {
+        getElement('#collegesList').innerHTML = `
+          <div class="empty-state" style="grid-column: 1 / -1;">
+            <div class="empty-state-icon">🔍</div>
+            <h3>No colleges found</h3>
+            <p>Try adjusting your filters or search query</p>
+          </div>
+        `;
+        return;
+      }
+      
+      const html = pageColleges.map(college => `
+        <div class="card college-card">
+          ${college.is_premier ? '<div class="premier-badge">⭐ Premier</div>' : ''}
+          <div class="college-header">
+            <div class="college-logo">${college.abbreviation.substring(0, 2)}</div>
+            <div>
+              <h3>${college.name}</h3>
+              <div class="college-location">📍 ${college.city}, ${college.state}</div>
+            </div>
+          </div>
+          <div class="college-rating">
+            <span class="stars">${renderStars(college.rating)}</span>
+            <span>${college.rating.toFixed(1)}</span>
+            <span style="color: #999; font-size: 0.9rem;">(${college.review_count})</span>
+          </div>
+          ${college.nirf_rank ? `<p style="margin: 0.5rem 0; color: #666;"><strong>NIRF Rank:</strong> #${college.nirf_rank}</p>` : ''}
+          ${college.placement_percentage ? `<p style="margin: 0.5rem 0; color: #666;"><strong>Placement:</strong> ${college.placement_percentage}%</p>` : ''}
+          ${college.avg_package ? `<p style="margin: 0.5rem 0; color: #666;"><strong>Avg Package:</strong> ${formatCurrency(college.avg_package)}</p>` : ''}
+          <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
+            <a href="/pages/colleges/detail.html?id=${college.id}" class="btn btn-primary btn-sm" style="flex: 1;">View Details</a>
+            <button class="btn btn-secondary btn-sm" onclick="toggleFavorite('${college.id}')" title="Add to favorites">❤️</button>
+          </div>
+        </div>
+      `).join('');
+      
+      getElement('#collegesList').innerHTML = html;
+      getElement('#collegeCount').textContent = `Showing ${start + 1}–${Math.min(end, filteredColleges.length)} of ${filteredColleges.length} colleges`;
+      
+      renderPagination();
+    }
+
+    function renderPagination() {
+      const totalPages = Math.ceil(filteredColleges.length / itemsPerPage);
+      const pagination = getElement('#pagination');
+      
+      if (totalPages <= 1) {
+        pagination.innerHTML = '';
+        return;
+      }
+      
+      let html = '';
+      if (currentPage > 1) {
+        html += `<button class="btn btn-secondary btn-sm" onclick="goToPage(${currentPage - 1})">← Previous</button>`;
+      }
+      
+      for (let i = Math.max(1, currentPage - 2); i <= Math.min(totalPages, currentPage + 2); i++) {
+        if (i === currentPage) {
+          html += `<button class="btn btn-primary btn-sm" disabled>${i}</button>`;
+        } else {
+          html += `<button class="btn btn-secondary btn-sm" onclick="goToPage(${i})">${i}</button>`;
+        }
+      }
+      
+      if (currentPage < totalPages) {
+        html += `<button class="btn btn-secondary btn-sm" onclick="goToPage(${currentPage + 1})">Next →</button>`;
+      }
+      
+      pagination.innerHTML = html;
+    }
+
+    function goToPage(page) {
+      currentPage = page;
+      displayColleges();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function applyFilters() {
+      currentPage = 1;
+      filteredColleges = [...allColleges];
+      
+      // Premier filter
+      const isPremier = getElement('#premierFilter').checked;
+      if (isPremier) {
+        filteredColleges = filteredColleges.filter(c => c.is_premier);
+      }
+      
+      // State filters
+      const selectedStates = Array.from(getElements('.stateFilter:checked')).map(el => el.value);
+      if (selectedStates.length > 0) {
+        filteredColleges = filteredColleges.filter(c => selectedStates.includes(c.state));
+      }
+      
+      // Rating filter
+      const ratingFilter = document.querySelector('input[name="rating"]:checked').value;
+      if (ratingFilter) {
+        filteredColleges = filteredColleges.filter(c => c.rating >= parseFloat(ratingFilter));
+      }
+      
+      // Apply current sort
+      if (currentSort) applySorting();
+      
+      displayColleges();
+    }
+
+    function clearFilters() {
+      getElement('#premierFilter').checked = false;
+      getElements('.stateFilter').forEach(el => el.checked = false);
+      document.querySelector('input[name="rating"][value=""]').checked = true;
+      getElement('#sortSelect').value = '';
+      currentSort = '';
+      currentPage = 1;
+      filteredColleges = [...allColleges];
+      displayColleges();
+    }
+
+    function handleSort() {
+      currentSort = getElement('#sortSelect').value;
+      currentPage = 1;
+      applySorting();
+      displayColleges();
+    }
+
+    function applySorting() {
+      if (currentSort === 'rating') {
+        filteredColleges.sort((a, b) => b.rating - a.rating);
+      } else if (currentSort === 'rank') {
+        filteredColleges.sort((a, b) => (a.nirf_rank || 9999) - (b.nirf_rank || 9999));
+      } else if (currentSort === 'name') {
+        filteredColleges.sort((a, b) => a.name.localeCompare(b.name));
+      }
+    }
+
+    function handleHeaderSearch() {
+      if (!isLoggedIn()) {
+        showError('Please sign in to unlock comprehensive search features');
+        setTimeout(() => navigateTo('/pages/auth/signin.html'), 1500);
+        return;
+      }
+      const query = getElement('#headerSearch').value.trim();
+      if (query) {
+        currentSearch = query;
+        currentPage = 1;
+        filteredColleges = allColleges.filter(c => 
+          c.name.toLowerCase().includes(query.toLowerCase()) ||
+          c.city.toLowerCase().includes(query.toLowerCase())
+        );
+        displayColleges();
+      }
+    }
+
+    function toggleFavorite(collegeId) {
+      if (!requireLogin()) return;
+      
+      showSuccess('Added to favorites!');
+    }
+
+    // Enter key search
+    getElement('#headerSearch')?.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') handleHeaderSearch();
+    });
+
+    // Load colleges on page load
+    document.addEventListener('DOMContentLoaded', loadColleges);
+  </script>
+</body>
+</html>

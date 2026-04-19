@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Dashboard - BigStudy</title>
+  <link rel="stylesheet" href="/public/css/styles.css">
+</head>
+<body>
+  <header>
+    <div class="container">
+      <nav class="navbar">
+        <a href="/" class="navbar-brand"><span style="font-size: 1.8rem; color: #FF6B4A;">B</span>BigStudy</a>
+        <ul class="navbar-menu">
+          <li><a href="/pages/colleges/index.html" class="nav-link">Colleges</a></li>
+          <li><a href="/pages/courses/index.html" class="nav-link">Courses</a></li>
+          <li><a href="/pages/exams/index.html" class="nav-link">Exams</a></li>
+        </ul>
+        <div class="navbar-actions">
+          <a href="/pages/dashboard/profile.html" class="btn btn-secondary btn-sm">My Profile</a>
+          <button class="btn btn-cta btn-sm" onclick="logout()">Logout</button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <section class="section">
+    <div class="container">
+      <h1>My Dashboard</h1>
+      
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; margin-top: 2rem;">
+        <!-- Profile Card -->
+        <div class="card">
+          <h3>👤 My Profile</h3>
+          <p id="userName" style="color: #666; margin: 1rem 0;">Loading...</p>
+          <p id="userEmail" style="color: #666; margin: 1rem 0;"></p>
+          <p id="userPhone" style="color:#666; margin:0.5rem 0; font-size:0.88rem;"></p>
+          <a href="/pages/dashboard/profile.html" class="btn btn-primary" style="width: 100%; margin-top:0.75rem;">✏️ Edit Profile</a>
+        </div>
+
+        <!-- Saved Colleges -->
+        <div class="card">
+          <h3>❤️ Saved Colleges</h3>
+          <p id="savedCount" style="color: #FF6B4A; font-size: 1.5rem; font-weight: bold; margin: 1rem 0;">0</p>
+          <a href="/pages/dashboard/favorites.html" class="btn btn-primary" style="width: 100%;">View Saved ❤️</a>
+        </div>
+
+        <!-- Applications -->
+        <div class="card">
+          <h3>📝 Applications</h3>
+          <p id="appCount" style="color: #00A896; font-size: 1.5rem; font-weight: bold; margin: 1rem 0;">0</p>
+          <a href="/pages/dashboard/applications.html" class="btn btn-primary" style="width: 100%;">Track Applications 📝</a>
+        </div>
+      </div>
+
+      <!-- Recent Activity -->
+      <div class="card" style="margin-top: 2rem;">
+        <h2>Recent Activity</h2>
+        <div id="recentActivity" style="margin-top: 1rem;">
+          <p style="color: #999; text-align: center; padding: 2rem;">No recent activity</p>
+        </div>
+      </div>
+
+      <!-- Quick Links -->
+      <div class="card" style="margin-top: 2rem;">
+        <h2>Explore More</h2>
+        <div class="grid grid-3" style="margin-top: 1rem;">
+          <a href="/pages/colleges/index.html" class="btn btn-secondary" style="text-align: center;">Browse Colleges</a>
+          <a href="/pages/courses/index.html" class="btn btn-secondary" style="text-align: center;">View Courses</a>
+          <a href="/pages/exams/index.html" class="btn btn-secondary" style="text-align: center;">See Exams</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h4>BigStudy</h4>
+          <p>India's leading platform for college exploration and entrance exam guidance.</p>
+        </div>
+        <div class="footer-section">
+          <h4>Quick Links</h4>
+          <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/pages/colleges/index.html">Colleges</a></li>
+            <li><a href="/pages/courses/index.html">Courses</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h4>Legal</h4>
+          <ul>
+            <li><a href="/pages/legal/privacy.html">Privacy Policy</a></li>
+            <li><a href="/pages/legal/terms.html">Terms & Conditions</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2025 BigStudy. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/public/js/supabase-client.js"></script>
+  <script src="/public/js/utils.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Check if user is logged in
+      if (!isLoggedIn()) {
+        navigateTo('/pages/auth/signin.html');
+        return;
+      }
+
+      const user = getCurrentUser();
+      if (user) {
+        getElement('#userName').textContent = user.user_metadata?.full_name || 'User';
+        getElement('#userEmail').textContent = user.email;
+      }
+
+      loadDashboardData();
+      loadProfileInfo();
+    });
+
+    async function loadDashboardData() {
+      try {
+        // Load favorites
+        const favorites = await BigStudyAPI.getUserFavorites();
+        getElement('#savedCount').textContent = favorites.length;
+
+        // Load applications
+        const apps = await BigStudyAPI.getUserApplications();
+        getElement('#appCount').textContent = apps.length;
+
+        // Load recent activity
+        if (apps.length > 0) {
+          const recentApps = apps.slice(-3).reverse();
+          const html = recentApps.map(app => `
+            <div style="padding: 1rem; border-left: 3px solid var(--accent);">
+              <p style="margin: 0; font-weight: 600;">Applied to college</p>
+              <p style="margin: 0.5rem 0; color: #666; font-size: 0.9rem;">${formatDate(app.application_date)}</p>
+              <span class="tag">${app.application_status}</span>
+            </div>
+          `).join('');
+          getElement('#recentActivity').innerHTML = html;
+        }
+      } catch (error) {
+        console.error('[v0] Error loading dashboard:', error);
+      }
+    }
+
+    function logout() {
+      if (confirm('Are you sure you want to logout?')) {
+        supabase.signOut();
+      }
+    }
+
+    // Also load profile info from DB
+    async function loadProfileInfo() {
+      try {
+        const profile = await BigStudyAPI.getUserProfile();
+        if (profile && profile.phone) {
+          getElement('#userPhone').textContent = '📞 ' + profile.phone;
+        }
+      } catch {}
+    }
+  </script>
+</body>
+</html>

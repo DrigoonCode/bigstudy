@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Courses - BigStudy</title>
+  <link rel="stylesheet" href="/public/css/styles.css">
+</head>
+<body>
+  <!-- Navigation -->
+  <header>
+    <div class="container">
+      <nav class="navbar">
+        <a href="/" class="navbar-brand"><span style="color:var(--cta);">B</span>igStudy</a>
+        <ul class="navbar-menu" id="navMenu">
+          <li><a href="/pages/colleges/index.html" class="nav-link">Colleges</a></li>
+          <li><a href="/pages/courses/index.html" class="nav-link active">Courses</a></li>
+          <li><a href="/pages/exams/index.html" class="nav-link">Exams</a></li>
+        </ul>
+        <div class="navbar-actions">
+          <div class="search-box">
+            <input type="text" id="search" placeholder="Search courses...">
+            <button onclick="handleSearch()">Search</button>
+          </div>
+          <a href="/pages/auth/signin.html" class="btn btn-secondary btn-sm">Sign In</a>
+          <a href="/pages/auth/signup.html" class="btn btn-cta btn-sm">Get Started</a>
+          <button class="nav-toggle" id="navToggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container">
+      <h1>Explore <span class="accent-text">Courses</span></h1>
+      <p>Discover 500+ courses across Engineering, Management, Science, Commerce, Arts, Medical, and Law streams.</p>
+    </div>
+  </section>
+
+  <!-- Content -->
+  <section class="section">
+    <div class="container">
+      <div style="display: grid; grid-template-columns: 250px 1fr; gap: 2rem;">
+        <!-- Filter -->
+        <div class="filters">
+          <h3 class="filter-title">🔍 Filter</h3>
+          <div class="filter-group">
+            <div class="filter-title">Stream</div>
+            <div class="filter-options">
+              <div class="filter-option">
+                <input type="checkbox" id="streamEng" class="streamFilter" value="Engineering" onchange="applyFilters()">
+                <label for="streamEng">Engineering</label>
+              </div>
+              <div class="filter-option">
+                <input type="checkbox" id="streamMgmt" class="streamFilter" value="Management" onchange="applyFilters()">
+                <label for="streamMgmt">Management</label>
+              </div>
+              <div class="filter-option">
+                <input type="checkbox" id="streamSci" class="streamFilter" value="Science" onchange="applyFilters()">
+                <label for="streamSci">Science</label>
+              </div>
+              <div class="filter-option">
+                <input type="checkbox" id="streamCom" class="streamFilter" value="Commerce" onchange="applyFilters()">
+                <label for="streamCom">Commerce</label>
+              </div>
+              <div class="filter-option">
+                <input type="checkbox" id="streamMed" class="streamFilter" value="Medical" onchange="applyFilters()">
+                <label for="streamMed">Medical</label>
+              </div>
+              <div class="filter-option">
+                <input type="checkbox" id="streamLaw" class="streamFilter" value="Law" onchange="applyFilters()">
+                <label for="streamLaw">Law</label>
+              </div>
+            </div>
+          </div>
+          <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+            <button class="btn btn-primary btn-sm" style="flex: 1;" onclick="applyFilters()">Apply</button>
+            <button class="btn btn-secondary btn-sm" style="flex: 1;" onclick="clearFilters()">Reset</button>
+          </div>
+        </div>
+
+        <!-- Courses -->
+        <div>
+          <p id="courseCount" style="color: #666; margin-bottom: 1rem;">Loading...</p>
+          <div id="coursesList" class="grid grid-3">
+            <!-- Courses loaded here -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h4>BigStudy</h4>
+          <p>India's leading platform for college exploration and entrance exam guidance.</p>
+        </div>
+        <div class="footer-section">
+          <h4>Explore</h4>
+          <ul>
+            <li><a href="/pages/colleges/index.html">Colleges</a></li>
+            <li><a href="/pages/courses/index.html">Courses</a></li>
+            <li><a href="/pages/exams/index.html">Entrance Exams</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h4>Legal</h4>
+          <ul>
+            <li><a href="/pages/legal/privacy.html">Privacy Policy</a></li>
+            <li><a href="/pages/legal/terms.html">Terms & Conditions</a></li>
+            <li><a href="/pages/legal/contact.html">Contact</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2025 BigStudy. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/public/js/supabase-client.js"></script>
+  <script src="/public/js/utils.js"></script>
+  <script>
+    const _nt=document.getElementById('navToggle'),_nm=document.getElementById('navMenu');
+    if(_nt&&_nm){_nt.addEventListener('click',()=>{_nt.classList.toggle('open');_nm.classList.toggle('open');});document.addEventListener('click',(e)=>{if(!_nt.contains(e.target)&&!_nm.contains(e.target)){_nt.classList.remove('open');_nm.classList.remove('open');}});}
+  </script>
+  <script>
+    let allCourses = [];
+    let filteredCourses = [];
+
+    async function loadCourses() {
+      try {
+        showLoading('#coursesList');
+        allCourses = await BigStudyAPI.getCourses({}, 1000);
+        filteredCourses = allCourses;
+        displayCourses();
+        hideLoading('#coursesList');
+      } catch (error) {
+        console.error('[v0] Error:', error);
+        showError('Failed to load courses');
+        hideLoading('#coursesList');
+      }
+    }
+
+    function displayCourses() {
+      if (filteredCourses.length === 0) {
+        getElement('#coursesList').innerHTML = '<div class="empty-state" style="grid-column: 1 / -1;"><p>No courses found</p></div>';
+        return;
+      }
+
+      const html = filteredCourses.map(course => `
+        <div class="card">
+          <h4>${course.name}</h4>
+          <p style="color: #666; margin: 0.5rem 0;"><strong>Stream:</strong> ${course.stream}</p>
+          <p style="color: #666; margin: 0.5rem 0;"><strong>Duration:</strong> ${course.duration_months} months</p>
+          <p style="color: #666; margin: 0.5rem 0;"><strong>Level:</strong> ${course.qualification_level}</p>
+          <div class="tags" style="margin: 1rem 0;">
+            <span class="tag tag-accent">${renderStars(course.rating)} ${course.rating.toFixed(1)}</span>
+          </div>
+          <p style="color: #666; font-size: 0.95rem; line-height: 1.5;">${truncate(course.description, 100)}</p>
+          <a href="/pages/courses/detail.html?id=${course.id}" class="btn btn-primary" style="width: 100%; margin-top: 1rem; display:block; text-align:center;">Learn More →</a>
+        </div>
+      `).join('');
+
+      getElement('#coursesList').innerHTML = html;
+      getElement('#courseCount').textContent = `Showing ${filteredCourses.length} courses`;
+    }
+
+    function applyFilters() {
+      const selectedStreams = Array.from(getElements('.streamFilter:checked')).map(el => el.value);
+      filteredCourses = selectedStreams.length > 0 
+        ? allCourses.filter(c => selectedStreams.includes(c.stream))
+        : allCourses;
+      displayCourses();
+    }
+
+    function clearFilters() {
+      getElements('.streamFilter').forEach(el => el.checked = false);
+      filteredCourses = allCourses;
+      displayCourses();
+    }
+
+    function handleSearch() {
+      if (!isLoggedIn()) {
+        showError('Please sign in to unlock comprehensive search features');
+        setTimeout(() => navigateTo('/pages/auth/signin.html'), 1500);
+        return;
+      }
+      const query = getElement('#search').value.toLowerCase();
+      filteredCourses = allCourses.filter(c => 
+        c.name.toLowerCase().includes(query) || 
+        c.stream.toLowerCase().includes(query)
+      );
+      displayCourses();
+    }
+
+    getElement('#search')?.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') handleSearch();
+    });
+
+    document.addEventListener('DOMContentLoaded', loadCourses);
+  </script>
+</body>
+</html>

@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title id="pageTitle">College Details - BigStudy</title>
+  <meta name="description" content="View college details, courses offered, placement stats and apply online.">
+  <link rel="stylesheet" href="/public/css/styles.css">
+  <style>
+    /* Apply Modal */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+    }
+    .modal-backdrop.active { display: flex; }
+    .modal-box {
+      background: white;
+      border-radius: 16px;
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 540px;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      animation: modalIn 0.25s ease;
+    }
+    @keyframes modalIn {
+      from { transform: translateY(30px); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+    .modal-close {
+      position: absolute;
+      top: 1rem; right: 1.25rem;
+      background: none; border: none;
+      font-size: 1.6rem; cursor: pointer;
+      color: #999; line-height: 1;
+    }
+    .modal-close:hover { color: #333; }
+    .modal-title { font-size: 1.4rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .modal-subtitle { color: #666; margin-bottom: 1.5rem; font-size: 0.95rem; }
+    .form-group { margin-bottom: 1.25rem; }
+    .form-group label { display: block; font-weight: 600; margin-bottom: 0.4rem; font-size: 0.9rem; }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%; padding: 0.7rem 1rem;
+      border: 1.5px solid #ddd; border-radius: 8px;
+      font-size: 0.95rem; transition: border-color 0.2s;
+      box-sizing: border-box;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+      outline: none; border-color: var(--primary);
+    }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .apply-steps { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
+    .step-badge {
+      padding: 0.25rem 0.75rem; border-radius: 20px;
+      font-size: 0.8rem; font-weight: 600;
+      background: var(--primary); color: white;
+    }
+    .success-state { text-align: center; padding: 2rem 0; }
+    .success-state .check-icon { font-size: 4rem; margin-bottom: 1rem; }
+    .success-state h3 { font-size: 1.4rem; margin-bottom: 0.5rem; }
+    /* College Hero */
+    .college-hero {
+      background: linear-gradient(135deg, var(--primary) 0%, #0f3028 100%);
+      color: white;
+      padding: 3rem 0 2rem;
+      margin-bottom: 0;
+    }
+    .college-hero-inner { display: flex; gap: 2rem; align-items: flex-start; }
+    .college-avatar {
+      width: 90px; height: 90px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.15);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.5rem; font-weight: 800;
+      color: white; flex-shrink: 0;
+      border: 2px solid rgba(255,255,255,0.3);
+    }
+    .college-hero-info { flex: 1; }
+    .college-hero-info h1 { font-size: 1.9rem; margin-bottom: 0.5rem; }
+    .college-hero-meta { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 0.75rem; opacity: 0.9; font-size: 0.9rem; }
+    .college-hero-meta span { display: flex; align-items: center; gap: 0.3rem; }
+    .college-hero-actions { display: flex; gap: 1rem; margin-top: 1.5rem; flex-wrap: wrap; }
+    .btn-white { background: white; color: var(--primary); font-weight: 700; padding: 0.75rem 1.75rem; border-radius: 8px; border: none; cursor: pointer; font-size: 0.95rem; transition: all 0.2s; }
+    .btn-white:hover { background: #f0f0f0; transform: translateY(-1px); }
+    .btn-outline-white { background: transparent; color: white; font-weight: 600; padding: 0.75rem 1.75rem; border-radius: 8px; border: 2px solid rgba(255,255,255,0.5); cursor: pointer; font-size: 0.95rem; transition: all 0.2s; }
+    .btn-outline-white:hover { background: rgba(255,255,255,0.1); border-color: white; }
+    /* Stats bar */
+    .stats-bar {
+      background: white;
+      border-bottom: 1px solid #eee;
+      padding: 1.5rem 0;
+    }
+    .stats-bar-inner { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+    .stat-item { text-align: center; }
+    .stat-value { font-size: 1.8rem; font-weight: 800; color: var(--primary); }
+    .stat-label { font-size: 0.82rem; color: #666; margin-top: 0.15rem; }
+    /* Content layout */
+    .detail-layout { display: grid; grid-template-columns: 1fr 320px; gap: 2rem; padding: 2rem 0; }
+    .detail-card { background: white; border-radius: 12px; padding: 1.75rem; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 1.5rem; }
+    .detail-card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 1.25rem; padding-bottom: 0.75rem; border-bottom: 2px solid #f0f0f0; }
+    .sidebar-card { background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 1.25rem; }
+    .sidebar-card h4 { font-size: 1rem; font-weight: 700; margin-bottom: 1rem; }
+    .info-row { display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 0; border-bottom: 1px solid #f5f5f5; font-size: 0.9rem; }
+    .info-row:last-child { border-bottom: none; }
+    .info-row .label { color: #777; }
+    .info-row .value { font-weight: 600; color: #333; text-align: right; max-width: 60%; }
+    .course-chip {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.6rem 1rem; border-radius: 8px;
+      background: #f8f9fa; border: 1px solid #eee;
+      font-size: 0.85rem; margin: 0.3rem;
+    }
+    .premier-ribbon {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      background: linear-gradient(135deg, #f6a629, #e8941a);
+      color: white; padding: 0.3rem 0.9rem;
+      border-radius: 20px; font-size: 0.8rem; font-weight: 700;
+      margin-left: 1rem; vertical-align: middle;
+    }
+    .apply-cta-card {
+      background: linear-gradient(135deg, var(--primary), #0f3028);
+      color: white; border-radius: 12px; padding: 1.5rem;
+      text-align: center; margin-bottom: 1.25rem;
+    }
+    .apply-cta-card h4 { color: white; margin-bottom: 0.5rem; }
+    .apply-cta-card p { color: rgba(255,255,255,0.8); font-size: 0.88rem; margin-bottom: 1.25rem; }
+    @media (max-width: 900px) {
+      .detail-layout { grid-template-columns: 1fr; }
+      .stats-bar-inner { grid-template-columns: repeat(2, 1fr); }
+      .college-hero-inner { flex-direction: column; }
+    }
+    @media (max-width: 600px) {
+      .form-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <header>
+    <div class="container">
+      <nav class="navbar">
+        <a href="/" class="navbar-brand"><span style="color:var(--cta);">B</span>igStudy</a>
+        <ul class="navbar-menu" id="navMenu">
+          <li><a href="/pages/colleges/index.html" class="nav-link active">Colleges</a></li>
+          <li><a href="/pages/courses/index.html" class="nav-link">Courses</a></li>
+          <li><a href="/pages/exams/index.html" class="nav-link">Exams</a></li>
+        </ul>
+        <div class="navbar-actions">
+          <a href="/pages/auth/signin.html" class="btn btn-secondary btn-sm">Sign In</a>
+          <a href="/pages/auth/signup.html" class="btn btn-cta btn-sm">Get Started</a>
+          <button class="nav-toggle" id="navToggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- College Hero -->
+  <section class="college-hero" id="collegeHero" style="display:none;">
+    <div class="container">
+      <a href="/pages/colleges/index.html" style="color:rgba(255,255,255,0.7); font-size:0.9rem; display:inline-block; margin-bottom:1rem;">← Back to Colleges</a>
+      <div class="college-hero-inner">
+        <div class="college-avatar" id="heroAvatar">B</div>
+        <div class="college-hero-info">
+          <h1 id="heroName">Loading...</h1>
+          <div class="college-hero-meta">
+            <span id="heroLocation">📍 —</span>
+            <span id="heroAffiliation">🏛 —</span>
+            <span id="heroFounded">📅 —</span>
+            <span id="heroRating">⭐ —</span>
+          </div>
+          <div class="college-hero-actions">
+            <button class="btn-white" id="applyBtn" onclick="openApplyModal()">🎓 Apply Now</button>
+            <button class="btn-outline-white" onclick="toggleFavorite()">❤️ <span id="favBtnText">Save College</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats Bar -->
+  <section class="stats-bar" id="statsBar" style="display:none;">
+    <div class="container">
+      <div class="stats-bar-inner">
+        <div class="stat-item">
+          <div class="stat-value" id="statPlacement">—</div>
+          <div class="stat-label">Placement Rate</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="statAvgPkg">—</div>
+          <div class="stat-label">Avg Package (LPA)</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="statHighPkg">—</div>
+          <div class="stat-label">Highest Package (LPA)</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="statNirf">—</div>
+          <div class="stat-label">NIRF Rank</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Detail Content -->
+  <section class="section" style="padding-top:2rem;">
+    <div class="container">
+      <!-- Loading State -->
+      <div id="loadingState" style="text-align:center; padding:4rem 0;">
+        <div style="font-size:2rem; margin-bottom:1rem;">⏳</div>
+        <p style="color:#666;">Loading college details...</p>
+      </div>
+
+      <div id="mainContent" class="detail-layout" style="display:none;">
+        <!-- LEFT COLUMN -->
+        <div>
+          <!-- About -->
+          <div class="detail-card">
+            <h3>📖 About This College</h3>
+            <p id="aboutText" style="color:#555; line-height:1.8;"></p>
+            <div id="admissionProcess" style="display:none; margin-top:1rem;">
+              <h4 style="margin-bottom:0.5rem;">Admission Process</h4>
+              <p id="admissionProcessText" style="color:#666; line-height:1.7; font-size:0.95rem;"></p>
+            </div>
+          </div>
+
+          <!-- Courses Offered -->
+          <div class="detail-card">
+            <h3>📚 Courses Offered</h3>
+            <div id="coursesList">
+              <p style="color:#999; font-size:0.9rem;">Loading courses...</p>
+            </div>
+          </div>
+
+          <!-- Contact Info -->
+          <div class="detail-card">
+            <h3>📞 Contact Information</h3>
+            <div class="info-row">
+              <span class="label">State</span>
+              <span class="value" id="contactState">—</span>
+            </div>
+            <div class="info-row">
+              <span class="label">City</span>
+              <span class="value" id="contactCity">—</span>
+            </div>
+            <div class="info-row">
+              <span class="label">Affiliation</span>
+              <span class="value" id="contactAffiliation">—</span>
+            </div>
+            <div class="info-row" id="websiteRow" style="display:none;">
+              <span class="label">Website</span>
+              <span class="value"><a id="contactWebsite" href="#" target="_blank">Visit Website →</a></span>
+            </div>
+            <div class="info-row" id="emailRow" style="display:none;">
+              <span class="label">Email</span>
+              <span class="value"><a id="contactEmail" href="#">—</a></span>
+            </div>
+            <div class="info-row" id="phoneRow" style="display:none;">
+              <span class="label">Phone</span>
+              <span class="value"><a id="contactPhone" href="#">—</a></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN / SIDEBAR -->
+        <div>
+          <!-- Apply CTA Card -->
+          <div class="apply-cta-card">
+            <h4>🎓 Ready to Apply?</h4>
+            <p>Submit your application directly and track its status in your dashboard.</p>
+            <button class="btn-white" style="width:100%;" onclick="openApplyModal()">Apply Now</button>
+          </div>
+
+          <!-- Quick Facts -->
+          <div class="sidebar-card">
+            <h4>📋 Quick Facts</h4>
+            <div class="info-row">
+              <span class="label">Established</span>
+              <span class="value" id="siFounded">—</span>
+            </div>
+            <div class="info-row">
+              <span class="label">Type</span>
+              <span class="value" id="siType">—</span>
+            </div>
+            <div class="info-row">
+              <span class="label">Location</span>
+              <span class="value" id="siLocation">—</span>
+            </div>
+            <div class="info-row" id="siNirfRow" style="display:none;">
+              <span class="label">NIRF Rank</span>
+              <span class="value" id="siNirf">—</span>
+            </div>
+            <div class="info-row">
+              <span class="label">Reviews</span>
+              <span class="value" id="siReviews">—</span>
+            </div>
+          </div>
+
+          <!-- Application Timeline -->
+          <div class="sidebar-card">
+            <h4>📅 Application Timeline</h4>
+            <div style="display:flex; flex-direction:column; gap:1rem; margin-top:0.5rem;">
+              <div style="border-left:3px solid var(--primary); padding-left:1rem;">
+                <p style="margin:0; color:#888; font-size:0.82rem;">Application Opens</p>
+                <p style="margin:0.2rem 0 0; font-weight:600; font-size:0.95rem;">Apr 15, 2025</p>
+              </div>
+              <div style="border-left:3px solid var(--cta); padding-left:1rem;">
+                <p style="margin:0; color:#888; font-size:0.82rem;">Last Date</p>
+                <p style="margin:0.2rem 0 0; font-weight:600; font-size:0.95rem;">Jun 30, 2025</p>
+              </div>
+              <div style="border-left:3px solid var(--success); padding-left:1rem;">
+                <p style="margin:0; color:#888; font-size:0.82rem;">Results Expected</p>
+                <p style="margin:0.2rem 0 0; font-weight:600; font-size:0.95rem;">Aug 2025</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Reviews snippet -->
+          <div class="sidebar-card">
+            <h4>⭐ Student Reviews</h4>
+            <div id="reviewsList">
+              <p style="color:#999; font-size:0.85rem;">Loading reviews...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== APPLY MODAL ===== -->
+  <div class="modal-backdrop" id="applyModal">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeApplyModal()">×</button>
+
+      <!-- Step 1: Application Form -->
+      <div id="applyStep1">
+        <div class="apply-steps">
+          <span class="step-badge">Step 1</span>
+          <span style="color:#999; font-size:0.85rem; align-self:center;">Fill Details</span>
+        </div>
+        <div class="modal-title">Apply to <span id="modalCollegeName">College</span></div>
+        <div class="modal-subtitle">Your application will be submitted directly and tracked in your dashboard.</div>
+
+        <form id="applicationForm" onsubmit="submitApplication(event)">
+          <div class="form-group">
+            <label>Select Course *</label>
+            <select id="appCourseSelect" required>
+              <option value="">— Choose a course —</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Your Full Name *</label>
+              <input type="text" id="appFullName" placeholder="As on documents" required>
+            </div>
+            <div class="form-group">
+              <label>Phone Number *</label>
+              <input type="tel" id="appPhone" placeholder="+91 XXXXX XXXXX" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>10th Marks (%)</label>
+              <input type="number" id="app10th" placeholder="e.g. 85" min="0" max="100" step="0.1">
+            </div>
+            <div class="form-group">
+              <label>12th / Diploma Marks (%)</label>
+              <input type="number" id="app12th" placeholder="e.g. 78" min="0" max="100" step="0.1">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Entrance Exam Score (if applicable)</label>
+            <input type="number" id="appExamScore" placeholder="e.g. 120 (JEE Mains)" min="0" step="0.01">
+          </div>
+
+          <div class="form-group">
+            <label>Why do you want to apply here?</label>
+            <textarea id="appStatement" rows="3" placeholder="Brief motivation statement (optional)..."></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-cta" style="width:100%; margin-top:0.5rem;" id="submitBtn">
+            Submit Application →
+          </button>
+        </form>
+      </div>
+
+      <!-- Step 2: Success -->
+      <div id="applyStep2" style="display:none;">
+        <div class="success-state">
+          <div class="check-icon">🎉</div>
+          <h3>Application Submitted!</h3>
+          <p style="color:#666; margin-bottom:1.5rem;">Your application has been recorded. You can track its status in your dashboard under <strong>My Applications</strong>.</p>
+          <a href="/pages/dashboard/applications.html" class="btn btn-primary" style="display:block; margin-bottom:0.75rem;">Track My Applications →</a>
+          <button onclick="closeApplyModal()" class="btn btn-secondary" style="width:100%;">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h4>BigStudy</h4>
+          <p>India's leading platform for college exploration and entrance exam guidance.</p>
+        </div>
+        <div class="footer-section">
+          <h4>Quick Links</h4>
+          <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/pages/colleges/index.html">Colleges</a></li>
+            <li><a href="/pages/courses/index.html">Courses</a></li>
+            <li><a href="/pages/exams/index.html">Exams</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h4>Account</h4>
+          <ul>
+            <li><a href="/pages/auth/signin.html">Sign In</a></li>
+            <li><a href="/pages/auth/signup.html">Sign Up</a></li>
+            <li><a href="/pages/dashboard/index.html">Dashboard</a></li>
+            <li><a href="/pages/dashboard/applications.html">My Applications</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2025 BigStudy. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/public/js/supabase-client.js"></script>
+  <script src="/public/js/utils.js"></script>
+  <script>
+    // Nav toggle
+    const _nt=document.getElementById('navToggle'),_nm=document.getElementById('navMenu');
+    if(_nt&&_nm){_nt.addEventListener('click',()=>{_nt.classList.toggle('open');_nm.classList.toggle('open');});document.addEventListener('click',(e)=>{if(!_nt.contains(e.target)&&!_nm.contains(e.target)){_nt.classList.remove('open');_nm.classList.remove('open');}});}
+
+    const params = new URLSearchParams(window.location.search);
+    const collegeId = params.get('id');
+    let collegeData = null;
+    let coursesData = [];
+    let isFavorited = false;
+
+    async function loadCollegeDetail() {
+      if (!collegeId) {
+        navigateTo('/pages/colleges/index.html');
+        return;
+      }
+
+      try {
+        collegeData = await BigStudyAPI.getCollegeById(collegeId);
+        if (!collegeData) {
+          document.getElementById('loadingState').innerHTML = '<div style="text-align:center;padding:4rem 0;"><div style="font-size:3rem">😕</div><h3>College not found</h3><a href="/pages/colleges/index.html" class="btn btn-primary" style="margin-top:1rem;">Browse Colleges</a></div>';
+          return;
+        }
+
+        populatePage(collegeData);
+
+        // Load courses
+        const collegeCourses = await BigStudyAPI.getCollegeCourses(collegeId);
+        populateCourses(collegeCourses);
+
+        // Load reviews
+        const reviews = await BigStudyAPI.getCollegeReviews(collegeId);
+        populateReviews(reviews);
+
+        // Check favorite status
+        if (isLoggedIn()) {
+          const favorites = await BigStudyAPI.getUserFavorites();
+          console.log('[v0] User favorites:', favorites);
+          if (favorites && favorites.some(f => f.college_id === collegeId)) {
+            isFavorited = true;
+            document.getElementById('favBtnText').textContent = 'Saved ✓';
+          }
+        }
+
+        document.getElementById('loadingState').style.display = 'none';
+        document.getElementById('collegeHero').style.display = 'block';
+        document.getElementById('statsBar').style.display = 'block';
+        document.getElementById('mainContent').style.display = 'grid';
+
+      } catch (error) {
+        console.error('[v0] Error loading college:', error);
+        document.getElementById('loadingState').innerHTML = '<div style="text-align:center;padding:4rem 0;"><div style="font-size:2rem">⚠️</div><p>Failed to load college details. Please try again.</p><a href="/pages/colleges/index.html" class="btn btn-secondary" style="margin-top:1rem;">← Back</a></div>';
+      }
+    }
+
+    function populatePage(c) {
+      document.title = `${c.name} - BigStudy`;
+      document.getElementById('pageTitle').textContent = c.name;
+
+      // Hero
+      const abbr = c.abbreviation || c.name.split(' ').map(w => w[0]).join('').substring(0,2).toUpperCase();
+      document.getElementById('heroAvatar').textContent = abbr.substring(0,2);
+      document.getElementById('heroName').innerHTML = c.name + (c.is_premier ? ' <span class="premier-ribbon">⭐ Premier</span>' : '');
+      document.getElementById('modalCollegeName').textContent = c.name;
+
+      // Only show location if we have real city/state (not 'nan')
+      const city = (c.city && c.city !== 'nan') ? c.city : null;
+      const state = (c.state && c.state !== 'nan') ? c.state : null;
+      const locationStr = [city, state].filter(Boolean).join(', ') || 'Location not available';
+      document.getElementById('heroLocation').textContent = '📍 ' + locationStr;
+      document.getElementById('heroAffiliation').textContent = '🏛 ' + (c.affiliation || 'Not specified');
+      document.getElementById('heroFounded').textContent = c.founded_year ? '📅 Est. ' + c.founded_year : '';
+      document.getElementById('heroRating').textContent = c.rating ? `⭐ ${parseFloat(c.rating).toFixed(1)} (${c.review_count} reviews)` : '';
+
+      // Stats bar
+      document.getElementById('statPlacement').textContent = c.placement_percentage ? parseFloat(c.placement_percentage).toFixed(1) + '%' : '—';
+      document.getElementById('statAvgPkg').textContent = c.avg_package ? '₹' + parseFloat(c.avg_package).toFixed(1) : '—';
+      document.getElementById('statHighPkg').textContent = c.highest_package ? '₹' + parseFloat(c.highest_package).toFixed(1) : '—';
+      document.getElementById('statNirf').textContent = c.nirf_rank ? '#' + c.nirf_rank : 'N/A';
+
+      // About
+      document.getElementById('aboutText').textContent = c.description || `${c.name} is a ${c.affiliation || 'recognized'} institution located in ${locationStr}. It offers comprehensive higher education programs with strong emphasis on academic excellence and industry readiness.`;
+      if (c.admission_process) {
+        document.getElementById('admissionProcess').style.display = 'block';
+        document.getElementById('admissionProcessText').textContent = c.admission_process;
+      }
+
+      // Contact
+      document.getElementById('contactState').textContent = state || '—';
+      document.getElementById('contactCity').textContent = city || '—';
+      document.getElementById('contactAffiliation').textContent = c.affiliation || '—';
+      if (c.website_url) {
+        document.getElementById('websiteRow').style.display = 'flex';
+        const wa = document.getElementById('contactWebsite');
+        wa.href = c.website_url;
+        wa.textContent = c.website_url.replace(/^https?:\/\/(www\.)?/, '');
+      }
+      if (c.contact_email) {
+        document.getElementById('emailRow').style.display = 'flex';
+        const ea = document.getElementById('contactEmail');
+        ea.href = 'mailto:' + c.contact_email;
+        ea.textContent = c.contact_email;
+      }
+      if (c.contact_phone) {
+        document.getElementById('phoneRow').style.display = 'flex';
+        const pa = document.getElementById('contactPhone');
+        pa.href = 'tel:' + c.contact_phone;
+        pa.textContent = c.contact_phone;
+      }
+
+      // Sidebar quick facts
+      document.getElementById('siFounded').textContent = c.founded_year || '—';
+      document.getElementById('siType').textContent = c.affiliation || '—';
+      document.getElementById('siLocation').textContent = locationStr;
+      if (c.nirf_rank) {
+        document.getElementById('siNirfRow').style.display = 'flex';
+        document.getElementById('siNirf').textContent = '#' + c.nirf_rank + (c.nirf_rank_year ? ' (' + c.nirf_rank_year + ')' : '');
+      }
+      document.getElementById('siReviews').textContent = (c.review_count || 0) + ' Reviews';
+    }
+
+    function populateCourses(collegeCourses) {
+      const container = document.getElementById('coursesList');
+      const applySelect = document.getElementById('appCourseSelect');
+
+      if (!collegeCourses || collegeCourses.length === 0) {
+        container.innerHTML = '<p style="color:#999; font-size:0.9rem;">Course details will be updated soon. Apply now and our team will share course information with you.</p>';
+        // Add generic option in apply form
+        const opt = document.createElement('option');
+        opt.value = 'general';
+        opt.textContent = 'General Admission';
+        applySelect.appendChild(opt);
+        coursesData = [];
+        return;
+      }
+
+      coursesData = collegeCourses;
+      container.innerHTML = '';
+      applySelect.innerHTML = '<option value="">— Choose a course —</option>';
+
+      collegeCourses.forEach(cc => {
+        const courseName = cc.course_name || cc.course_id || 'Course';
+        const chip = document.createElement('div');
+        chip.className = 'course-chip';
+        chip.innerHTML = `
+          <span>📘</span>
+          <div>
+            <div style="font-weight:600;">${courseName}</div>
+            ${cc.fees ? `<div style="color:#888;font-size:0.8rem;">Fee: ₹${parseFloat(cc.fees).toLocaleString('en-IN')}</div>` : ''}
+            ${cc.seats ? `<div style="color:#888;font-size:0.8rem;">Seats: ${cc.seats}</div>` : ''}
+          </div>
+        `;
+        container.appendChild(chip);
+
+        const opt = document.createElement('option');
+        opt.value = cc.course_id || 'general';
+        opt.textContent = courseName;
+        applySelect.appendChild(opt);
+      });
+    }
+
+    function populateReviews(reviews) {
+      const container = document.getElementById('reviewsList');
+      if (!reviews || reviews.length === 0) {
+        container.innerHTML = '<p style="color:#999; font-size:0.85rem;">No reviews yet. Be the first to share your experience!</p>';
+        return;
+      }
+      container.innerHTML = reviews.slice(0,3).map(r => `
+        <div style="padding:0.75rem 0; border-bottom:1px solid #f5f5f5;">
+          <div style="display:flex; justify-content:space-between; margin-bottom:0.3rem;">
+            <strong style="font-size:0.9rem;">${r.title || 'Student Review'}</strong>
+            <span style="font-size:0.85rem; color:#f59e0b;">${'★'.repeat(r.rating || 4)}</span>
+          </div>
+          <p style="margin:0; color:#666; font-size:0.82rem; line-height:1.5;">${(r.comment || '').substring(0,120)}${r.comment && r.comment.length > 120 ? '...' : ''}</p>
+        </div>
+      `).join('');
+    }
+
+    // ===== APPLY MODAL =====
+    async function openApplyModal() {
+      if (!isLoggedIn()) {
+        showError('Please sign in to apply to colleges');
+        setTimeout(() => navigateTo('/pages/auth/signin.html'), 1500);
+        return;
+      }
+      
+      const user = getCurrentUser();
+      
+      // Try to fetch detailed profile to pre-fill marks and phone
+      try {
+        const profile = await BigStudyAPI.getUserProfile();
+        if (profile) {
+          document.getElementById('appFullName').value = profile.full_name || user?.user_metadata?.full_name || '';
+          if (profile.phone) document.getElementById('appPhone').value = profile.phone;
+          if (profile.tenth_marks) document.getElementById('app10th').value = profile.tenth_marks;
+          if (profile.twelfth_marks) document.getElementById('app12th').value = profile.twelfth_marks;
+        } else if (user) {
+          document.getElementById('appFullName').value = user.user_metadata?.full_name || '';
+        }
+      } catch (e) {
+        if (user) document.getElementById('appFullName').value = user.user_metadata?.full_name || '';
+      }
+
+      document.getElementById('applyStep1').style.display = 'block';
+      document.getElementById('applyStep2').style.display = 'none';
+      document.getElementById('applyModal').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeApplyModal() {
+      document.getElementById('applyModal').classList.remove('active');
+      document.body.style.overflow = '';
+      document.getElementById('applicationForm').reset();
+      document.getElementById('applyStep1').style.display = 'block';
+      document.getElementById('applyStep2').style.display = 'none';
+    }
+
+    // Close on backdrop click
+    document.getElementById('applyModal').addEventListener('click', function(e) {
+      if (e.target === this) closeApplyModal();
+    });
+
+    async function submitApplication(e) {
+      e.preventDefault();
+      const btn = document.getElementById('submitBtn');
+      const courseId = document.getElementById('appCourseSelect').value;
+      const examScore = parseFloat(document.getElementById('appExamScore').value) || null;
+
+      if (!courseId) {
+        showError('Please select a course to apply for');
+        return;
+      }
+
+      try {
+        btn.disabled = true;
+        btn.textContent = 'Submitting...';
+
+        // Check if already applied
+        const alreadyApplied = await BigStudyAPI.hasAlreadyApplied(collegeId, courseId === 'general' ? null : courseId);
+        if (alreadyApplied) {
+          showError('You have already applied for this course at this college. Check your dashboard.');
+          btn.disabled = false;
+          btn.textContent = 'Submit Application →';
+          return;
+        }
+
+        await BigStudyAPI.submitApplication(
+          collegeId,
+          courseId === 'general' ? null : courseId,
+          examScore
+        );
+
+        // Show success state
+        document.getElementById('applyStep1').style.display = 'none';
+        document.getElementById('applyStep2').style.display = 'block';
+
+      } catch (error) {
+        console.error('[v0] Application error:', error);
+        showError(error.message || 'Failed to submit application. Please try again.');
+        btn.disabled = false;
+        btn.textContent = 'Submit Application →';
+      }
+    }
+
+    // ===== FAVORITES =====
+    async function toggleFavorite() {
+      if (!isLoggedIn()) {
+        showError('Please sign in to save colleges');
+        return;
+      }
+      try {
+        if (isFavorited) {
+          await BigStudyAPI.removeFavorite(collegeId);
+          isFavorited = false;
+          document.getElementById('favBtnText').textContent = 'Save College';
+          showSuccess('Removed from favorites');
+        } else {
+          await BigStudyAPI.addFavorite(collegeId);
+          isFavorited = true;
+          document.getElementById('favBtnText').textContent = 'Saved ✓';
+          showSuccess('Saved to your favorites!');
+        }
+      } catch (err) {
+        console.error('[v0] Favorite error:', err);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadCollegeDetail();
+      updateNavbarAuth();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Applications - BigStudy</title>
+  <link rel="stylesheet" href="/public/css/styles.css">
+  <style>
+    .profile-layout { display: grid; grid-template-columns: 260px 1fr; gap: 2rem; margin-top: 2rem; }
+    .sidebar-nav { background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.06); height: fit-content; }
+    .sidebar-nav .avatar {
+      width: 80px; height: 80px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), #0f3028);
+      color: white; font-size: 2rem; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 1rem;
+    }
+    .sidebar-nav .user-name { text-align: center; font-weight: 700; font-size: 1rem; margin-bottom: 0.25rem; }
+    .sidebar-nav .user-email { text-align: center; color: #888; font-size: 0.82rem; margin-bottom: 1.5rem; }
+    .nav-item {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.75rem 1rem; border-radius: 8px;
+      color: #555; font-size: 0.9rem; cursor: pointer;
+      text-decoration: none; margin-bottom: 0.25rem; transition: all 0.15s;
+    }
+    .nav-item:hover, .nav-item.active { background: #f0f7f5; color: var(--primary); font-weight: 600; }
+    /* Summary Cards */
+    .summary-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; margin-bottom: 1.5rem; }
+    .summary-card { background: white; border-radius: 12px; padding: 1.25rem; box-shadow: 0 2px 8px rgba(0,0,0,0.06); text-align: center; }
+    .summary-card .num { font-size: 2rem; font-weight: 800; }
+    .summary-card .lbl { font-size: 0.8rem; color: #777; margin-top: 0.2rem; }
+    .num-all { color: var(--primary); }
+    .num-pending { color: #f59e0b; }
+    .num-reviewing { color: #3b82f6; }
+    .num-accepted { color: #10b981; }
+    /* Application Cards */
+    .app-card {
+      background: white; border-radius: 12px; padding: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 1rem;
+      border-left: 4px solid #ddd; transition: box-shadow 0.2s;
+    }
+    .app-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+    .app-card.status-pending   { border-left-color: #f59e0b; }
+    .app-card.status-reviewing { border-left-color: #3b82f6; }
+    .app-card.status-accepted  { border-left-color: #10b981; }
+    .app-card.status-rejected  { border-left-color: #ef4444; }
+    .app-card-top { display: flex; align-items: flex-start; gap: 1rem; }
+    .app-college-logo {
+      width: 52px; height: 52px; border-radius: 10px;
+      background: linear-gradient(135deg, var(--primary), #0f3028);
+      color: white; font-weight: 800; font-size: 1.1rem;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .app-info { flex: 1; }
+    .app-college-name { font-size: 1rem; font-weight: 700; margin-bottom: 0.2rem; }
+    .app-meta { color: #777; font-size: 0.85rem; }
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.3rem 0.85rem; border-radius: 20px;
+      font-size: 0.78rem; font-weight: 700;
+    }
+    .badge-pending   { background: #fef3c7; color: #92400e; }
+    .badge-reviewing { background: #dbeafe; color: #1e40af; }
+    .badge-accepted  { background: #d1fae5; color: #065f46; }
+    .badge-rejected  { background: #fee2e2; color: #991b1b; }
+    .progress-bar-wrap { margin-top: 1rem; }
+    .progress-label { display: flex; justify-content: space-between; font-size: 0.78rem; color: #888; margin-bottom: 0.4rem; }
+    .progress-track { height: 6px; background: #f0f0f0; border-radius: 3px; overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
+    .fill-pending   { background: #f59e0b; width: 25%; }
+    .fill-reviewing { background: #3b82f6; width: 60%; }
+    .fill-accepted  { background: #10b981; width: 100%; }
+    .fill-rejected  { background: #ef4444; width: 100%; }
+    .timeline-steps { display: flex; align-items: center; margin-top: 1rem; }
+    .t-step { text-align: center; flex: 1; }
+    .t-circle {
+      width: 22px; height: 22px; border-radius: 50%;
+      font-size: 0.68rem; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 0.25rem;
+    }
+    .t-label { font-size: 0.72rem; }
+    .t-line { flex: 0.5; height: 2px; margin-bottom: 1.2rem; }
+    .t-done-circle { background: var(--primary); color: white; }
+    .t-todo-circle { background: #e5e7eb; color: #bbb; }
+    .t-done-line { background: var(--primary); }
+    .t-todo-line { background: #e5e7eb; }
+    .t-done-label { color: var(--primary); font-weight: 600; }
+    .t-todo-label { color: #bbb; }
+    .app-date { font-size: 0.78rem; color: #aaa; margin-top: 0.75rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
+    .empty-state { text-align: center; padding: 4rem 2rem; background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    .empty-state .icon { font-size: 4rem; margin-bottom: 1rem; }
+    .empty-state h3 { margin-bottom: 0.5rem; }
+    .empty-state p { color: #888; margin-bottom: 1.5rem; }
+    .filter-bar { display: flex; gap: 0.5rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+    .filter-pill { padding: 0.4rem 1rem; border-radius: 20px; border: 1.5px solid #ddd; background: white; font-size: 0.85rem; cursor: pointer; transition: all 0.15s; }
+    .filter-pill.active, .filter-pill:hover { background: var(--primary); color: white; border-color: var(--primary); }
+    @media (max-width: 800px) {
+      .profile-layout { grid-template-columns: 1fr; }
+      .summary-grid { grid-template-columns: repeat(2,1fr); }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <nav class="navbar">
+        <a href="/" class="navbar-brand"><span style="color:var(--cta);">B</span>igStudy</a>
+        <ul class="navbar-menu" id="navMenu">
+          <li><a href="/pages/colleges/index.html" class="nav-link">Colleges</a></li>
+          <li><a href="/pages/courses/index.html" class="nav-link">Courses</a></li>
+          <li><a href="/pages/exams/index.html" class="nav-link">Exams</a></li>
+        </ul>
+        <div class="navbar-actions">
+          <a href="/pages/dashboard/index.html" class="btn btn-secondary btn-sm">Dashboard</a>
+          <button class="btn btn-cta btn-sm" onclick="handleLogout()">Logout</button>
+          <button class="nav-toggle" id="navToggle"><span></span><span></span><span></span></button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <section class="section" style="padding-top:2rem;">
+    <div class="container">
+      <div class="profile-layout">
+
+        <!-- Sidebar -->
+        <div class="sidebar-nav">
+          <div class="avatar" id="sidebarAvatar">U</div>
+          <div class="user-name" id="sidebarName">Loading...</div>
+          <div class="user-email" id="sidebarEmail"></div>
+          <a href="/pages/dashboard/index.html" class="nav-item">🏠 Dashboard</a>
+          <a href="/pages/dashboard/profile.html" class="nav-item">👤 Edit Profile</a>
+          <a href="/pages/dashboard/favorites.html" class="nav-item">❤️ Saved Colleges</a>
+          <a href="/pages/dashboard/applications.html" class="nav-item active">📝 My Applications</a>
+          <div style="border-top:1px solid #eee; margin:1rem 0;"></div>
+          <a href="javascript:void(0)" class="nav-item" onclick="handleLogout()" style="color:#e53935;">🚪 Logout</a>
+        </div>
+
+        <!-- Main -->
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; flex-wrap:wrap; gap:1rem;">
+            <div>
+              <h2 style="margin:0;">📝 My Applications</h2>
+              <p style="color:#888; margin:0.25rem 0 0; font-size:0.9rem;">Track all your college applications in real time.</p>
+            </div>
+            <a href="/pages/colleges/index.html" class="btn btn-cta">+ Apply to College</a>
+          </div>
+
+          <!-- Summary -->
+          <div class="summary-grid">
+            <div class="summary-card"><div class="num num-all" id="countAll">0</div><div class="lbl">Total Applications</div></div>
+            <div class="summary-card"><div class="num num-pending" id="countPending">0</div><div class="lbl">Pending Review</div></div>
+            <div class="summary-card"><div class="num num-reviewing" id="countReviewing">0</div><div class="lbl">Under Review</div></div>
+            <div class="summary-card"><div class="num num-accepted" id="countAccepted">0</div><div class="lbl">Accepted</div></div>
+          </div>
+
+          <!-- Filter Pills -->
+          <div class="filter-bar">
+            <button class="filter-pill active" onclick="filterApps('all',this)">All</button>
+            <button class="filter-pill" onclick="filterApps('pending',this)">Pending</button>
+            <button class="filter-pill" onclick="filterApps('reviewing',this)">Reviewing</button>
+            <button class="filter-pill" onclick="filterApps('accepted',this)">Accepted</button>
+            <button class="filter-pill" onclick="filterApps('rejected',this)">Rejected</button>
+          </div>
+
+          <div id="appsLoading" style="text-align:center; padding:2rem; color:#888;">⏳ Loading your applications...</div>
+          <div id="appsList"></div>
+          <div class="empty-state" id="emptyState" style="display:none;">
+            <div class="icon">📭</div>
+            <h3>No Applications Yet</h3>
+            <p>You haven't applied to any college. Browse colleges and click <strong>"Apply Now"</strong> to begin.</p>
+            <a href="/pages/colleges/index.html" class="btn btn-cta">Browse Colleges →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script src="/public/js/supabase-client.js"></script>
+  <script src="/public/js/utils.js"></script>
+  <script>
+    const _nt=document.getElementById('navToggle'),_nm=document.getElementById('navMenu');
+    if(_nt&&_nm){_nt.addEventListener('click',()=>{_nt.classList.toggle('open');_nm.classList.toggle('open');});document.addEventListener('click',(e)=>{if(!_nt.contains(e.target)&&!_nm.contains(e.target)){_nt.classList.remove('open');_nm.classList.remove('open');}});}
+
+    let allApplications = [];
+    let collegesCache = {};
+
+    const STATUS = {
+      pending:   { label:'🕐 Pending',   badge:'badge-pending',   fill:'fill-pending',   pct:'25%',  step:0, desc:'Application received, awaiting review.' },
+      reviewing: { label:'🔍 Reviewing', badge:'badge-reviewing', fill:'fill-reviewing', pct:'60%',  step:1, desc:'Admissions team is reviewing your application.' },
+      accepted:  { label:'✅ Accepted',  badge:'badge-accepted',  fill:'fill-accepted',  pct:'100%', step:3, desc:'Congratulations! Your application was accepted.' },
+      rejected:  { label:'❌ Rejected',  badge:'badge-rejected',  fill:'fill-rejected',  pct:'100%', step:3, desc:'Your application was not accepted this time.' }
+    };
+
+    const STEPS = ['Submitted','Reviewing','Decision','Confirmed'];
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (!isLoggedIn()) { navigateTo('/pages/auth/signin.html'); return; }
+      const user = getCurrentUser();
+      if (user) {
+        const name = user.user_metadata?.full_name || user.email || 'User';
+        document.getElementById('sidebarAvatar').textContent = name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+        document.getElementById('sidebarName').textContent = name;
+        document.getElementById('sidebarEmail').textContent = user.email || '';
+      }
+      await loadApplications();
+    });
+
+    async function loadApplications() {
+      try {
+        allApplications = await BigStudyAPI.getUserApplications();
+        document.getElementById('appsLoading').style.display = 'none';
+
+        // Batch-fetch college details
+        const ids = [...new Set(allApplications.map(a=>a.college_id).filter(Boolean))];
+        await Promise.all(ids.map(async id => {
+          try { const c = await BigStudyAPI.getCollegeById(id); if (c) collegesCache[id] = c; } catch {}
+        }));
+
+        updateCounters(allApplications);
+        renderApplications(allApplications);
+      } catch (err) {
+        document.getElementById('appsLoading').innerHTML = '<p style="color:#e53935; text-align:center;">Failed to load. Please refresh.</p>';
+        console.error('[v0]', err);
+      }
+    }
+
+    function updateCounters(apps) {
+      document.getElementById('countAll').textContent      = apps.length;
+      document.getElementById('countPending').textContent  = apps.filter(a=>a.application_status==='pending').length;
+      document.getElementById('countReviewing').textContent= apps.filter(a=>a.application_status==='reviewing').length;
+      document.getElementById('countAccepted').textContent = apps.filter(a=>a.application_status==='accepted').length;
+    }
+
+    function filterApps(status, btn) {
+      document.querySelectorAll('.filter-pill').forEach(p=>p.classList.remove('active'));
+      btn.classList.add('active');
+      const filtered = status === 'all' ? allApplications : allApplications.filter(a=>a.application_status===status);
+      renderApplications(filtered);
+    }
+
+    function renderApplications(apps) {
+      const list  = document.getElementById('appsList');
+      const empty = document.getElementById('emptyState');
+
+      if (!apps || apps.length === 0) {
+        list.innerHTML = '';
+        empty.style.display = 'block';
+        return;
+      }
+      empty.style.display = 'none';
+
+      list.innerHTML = apps.map(app => {
+        const college   = collegesCache[app.college_id];
+        const name      = college ? college.name : 'College Application';
+        const abbr      = college ? (college.abbreviation||college.name.split(' ').map(w=>w[0]).join('')).substring(0,2).toUpperCase() : 'CO';
+        const city      = college && college.city  !== 'nan' ? college.city  : '';
+        const state     = college && college.state !== 'nan' ? college.state : '';
+        const loc       = [city,state].filter(Boolean).join(', ');
+        const status    = app.application_status || 'pending';
+        const cfg       = STATUS[status] || STATUS.pending;
+        const dateStr   = app.application_date
+          ? new Date(app.application_date).toLocaleDateString('en-IN', {day:'numeric',month:'short',year:'numeric'})
+          : 'Recently';
+
+        // Timeline steps HTML
+        const timelineHtml = STEPS.map((step, i) => {
+          const done  = i <= cfg.step;
+          const last  = i === STEPS.length - 1;
+          return `
+            <div class="t-step">
+              <div class="t-circle ${done?'t-done-circle':'t-todo-circle'}">${done?'✓':i+1}</div>
+              <div class="t-label ${done?'t-done-label':'t-todo-label'}">${step}</div>
+            </div>
+            ${!last ? `<div class="t-line ${i < cfg.step ? 't-done-line':'t-todo-line'}"></div>` : ''}
+          `;
+        }).join('');
+
+        return `
+          <div class="app-card status-${status}">
+            <div class="app-card-top">
+              <div class="app-college-logo">${abbr}</div>
+              <div class="app-info">
+                <div class="app-college-name">${name}</div>
+                <div class="app-meta">
+                  ${loc ? `📍 ${loc}` : ''}
+                  ${college && college.nirf_rank ? ` &nbsp;🏆 NIRF #${college.nirf_rank}` : ''}
+                  ${app.exam_score ? ` &nbsp;📊 Score: ${app.exam_score}` : ''}
+                </div>
+              </div>
+              <span class="status-badge ${cfg.badge}">${cfg.label}</span>
+            </div>
+
+            <div class="progress-bar-wrap">
+              <div class="progress-label"><span>${cfg.desc}</span><span>${cfg.pct}</span></div>
+              <div class="progress-track"><div class="progress-fill ${cfg.fill}"></div></div>
+            </div>
+
+            <div class="timeline-steps">${timelineHtml}</div>
+
+            <div class="app-date">
+              <span>Applied: ${dateStr}</span>
+              ${college ? `<a href="/pages/colleges/detail.html?id=${app.college_id}" class="btn btn-secondary" style="font-size:0.8rem;padding:0.35rem 0.75rem;">View College →</a>` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function handleLogout() {
+      if (confirm('Are you sure you want to logout?')) supabase.signOut();
+    }
+  </script>
+</body>
+</html>

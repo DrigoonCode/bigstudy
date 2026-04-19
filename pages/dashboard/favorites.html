@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Saved Colleges - BigStudy</title>
+  <link rel="stylesheet" href="/public/css/styles.css">
+</head>
+<body>
+  <header>
+    <div class="container">
+      <nav class="navbar">
+        <a href="/" class="navbar-brand"><span style="font-size: 1.8rem; color: #FF6B4A;">B</span>BigStudy</a>
+        <div class="navbar-actions">
+          <a href="/pages/dashboard/index.html" class="btn btn-secondary btn-sm">Dashboard</a>
+          <button class="btn btn-secondary btn-sm" onclick="logout()">Logout</button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <section class="section">
+    <div class="container">
+      <h1>Saved Colleges</h1>
+      <a href="/pages/colleges/index.html" class="btn btn-secondary btn-sm" style="margin-bottom: 2rem;">+ Add More Colleges</a>
+      
+      <div id="favoritesList" class="grid grid-3">
+        <!-- Favorites loaded here -->
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h4>BigStudy</h4>
+          <p>India's leading platform for college exploration and entrance exam guidance.</p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2025 BigStudy. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/public/js/supabase-client.js"></script>
+  <script src="/public/js/utils.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!isLoggedIn()) navigateTo('/pages/auth/signin.html');
+      loadFavorites();
+    });
+
+    async function loadFavorites() {
+      try {
+        showLoading('#favoritesList');
+        const favorites = await BigStudyAPI.getUserFavorites();
+        console.log('[v0] Fetched favorites:', favorites);
+        
+        if (!favorites || favorites.length === 0) {
+          getElement('#favoritesList').innerHTML = `
+            <div class="empty-state" style="grid-column: 1 / -1; text-align: center; padding: 4rem 2rem; background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+              <div style="font-size: 3rem; margin-bottom: 1rem;">❤️</div>
+              <h3 style="margin-bottom: 0.5rem; font-size:1.2rem;">No saved colleges yet</h3>
+              <p style="color: #888; margin-bottom: 1.5rem; font-size: 0.95rem;">Browse our list of colleges and save the ones you are interested in.</p>
+              <a href="/pages/colleges/index.html" class="btn btn-cta">Browse Colleges</a>
+            </div>
+          `;
+          hideLoading('#favoritesList');
+          return;
+        }
+
+        // Load college details for each favorite
+        const collegesRaw = await Promise.all(favorites.map(fav => BigStudyAPI.getCollegeById(fav.college_id)));
+        const colleges = collegesRaw.filter(c => c !== null); // Filter out any nulls
+        console.log('[v0] Fetched favored colleges:', colleges);
+        
+        const html = colleges.map(college => `
+          <div class="card college-card">
+            <div class="college-header">
+              <div class="college-logo">${college.abbreviation.substring(0, 2)}</div>
+              <div><h3>${college.name}</h3></div>
+            </div>
+            <p style="color: #666;">📍 ${college.city}, ${college.state}</p>
+            <div class="college-rating">
+              <span class="stars">${renderStars(college.rating)}</span>
+              <span>${college.rating.toFixed(1)}</span>
+            </div>
+            <a href="/pages/colleges/detail.html?id=${college.id}" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">View Details</a>
+          </div>
+        `).join('');
+        
+        getElement('#favoritesList').innerHTML = html;
+        hideLoading('#favoritesList');
+      } catch (error) {
+        console.error('[v0] Error:', error);
+        showError('Failed to load favorites');
+        hideLoading('#favoritesList');
+      }
+    }
+
+    function logout() {
+      if (confirm('Logout?')) supabase.signOut();
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact Us - BigStudy</title>
+  <link rel="stylesheet" href="/public/css/styles.css">
+</head>
+<body>
+  <header>
+    <div class="container">
+      <nav class="navbar">
+        <a href="/" class="navbar-brand"><span style="font-size: 1.8rem; color: #FF6B4A;">B</span>BigStudy</a>
+        <div class="navbar-actions">
+          <a href="/" class="btn btn-secondary btn-sm">Back Home</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="container">
+      <h1>Get in <span class="accent-text">Touch</span></h1>
+      <p>We're here to help and answer any question you might have</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; max-width: 1000px; margin: 0 auto;">
+        <!-- Contact Info -->
+        <div>
+          <h2>Contact Information</h2>
+          
+          <div class="card" style="margin-top: 1.5rem;">
+            <h4 style="margin-bottom: 0.5rem;">📧 Email</h4>
+            <p style="margin: 0;">
+              <strong>General:</strong> <a href="mailto:hello@bigstudy.in">hello@bigstudy.in</a><br>
+              <strong>Support:</strong> <a href="mailto:support@bigstudy.in">support@bigstudy.in</a><br>
+              <strong>Partnerships:</strong> <a href="mailto:partners@bigstudy.in">partners@bigstudy.in</a>
+            </p>
+          </div>
+
+          <div class="card">
+            <h4 style="margin-bottom: 0.5rem;">📱 Phone</h4>
+            <p style="margin: 0;">
+              <a href="tel:+919876543210">+91 98765 43210</a><br>
+              Toll Free: 1800-BIGSTUDY
+            </p>
+          </div>
+
+          <div class="card">
+            <h4 style="margin-bottom: 0.5rem;">📍 Office</h4>
+            <p style="margin: 0;">
+              BigStudy Headquarters<br>
+              Delhi NCR, India<br>
+              <a href="https://maps.google.com" target="_blank">View on Map</a>
+            </p>
+          </div>
+
+          <div class="card">
+            <h4 style="margin-bottom: 0.5rem;">🕐 Business Hours</h4>
+            <p style="margin: 0;">
+              Monday - Friday: 9:00 AM - 6:00 PM<br>
+              Saturday: 10:00 AM - 4:00 PM<br>
+              Sunday: Closed
+            </p>
+          </div>
+        </div>
+
+        <!-- Contact Form -->
+        <div>
+          <h2>Send us a Message</h2>
+          
+          <form id="contactForm" class="card" style="margin-top: 1.5rem;">
+            <div class="form-group">
+              <label for="name">Full Name</label>
+              <input type="text" id="name" name="name" required>
+            </div>
+
+            <div class="form-group">
+              <label for="email">Email Address</label>
+              <input type="email" id="email" name="email" required>
+            </div>
+
+            <div class="form-group">
+              <label for="subject">Subject</label>
+              <input type="text" id="subject" name="subject" required>
+            </div>
+
+            <div class="form-group">
+              <label for="message">Message</label>
+              <textarea id="message" name="message" required placeholder="Tell us how we can help..."></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-cta" style="width: 100%;">Send Message</button>
+          </form>
+
+          <p style="color: #999; font-size: 0.9rem; margin-top: 1rem; text-align: center;">
+            We typically respond within 24 hours
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section class="section" style="background: #f9f9f9;">
+    <div class="container" style="max-width: 800px;">
+      <h2 style="text-align: center; margin-bottom: 3rem;">Frequently Asked Questions</h2>
+
+      <div class="card" style="margin-bottom: 1rem;">
+        <h4 style="margin-bottom: 0.5rem; cursor: pointer;" onclick="toggleFAQ(this)">How can I create an account?</h4>
+        <div style="display: none; color: #666; margin-top: 1rem;">
+          Click the "Get Started" button on the homepage, fill in your details, and verify your email. Your account will be created instantly!
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom: 1rem;">
+        <h4 style="margin-bottom: 0.5rem; cursor: pointer;" onclick="toggleFAQ(this)">Is BigStudy free to use?</h4>
+        <div style="display: none; color: #666; margin-top: 1rem;">
+          Yes! Browsing colleges, courses, and exams is completely free. Premium features may be available in the future.
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom: 1rem;">
+        <h4 style="margin-bottom: 0.5rem; cursor: pointer;" onclick="toggleFAQ(this)">How accurate is the college information?</h4>
+        <div style="display: none; color: #666; margin-top: 1rem;">
+          We source data from official NIRF rankings, college websites, and verified student reviews. However, we recommend contacting colleges directly for the most current information.
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom: 1rem;">
+        <h4 style="margin-bottom: 0.5rem; cursor: pointer;" onclick="toggleFAQ(this)">Can I apply to colleges through BigStudy?</h4>
+        <div style="display: none; color: #666; margin-top: 1rem;">
+          BigStudy provides detailed college information and helps you decide. For applications, you'll be directed to official college portals or entrance exam websites.
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom: 1rem;">
+        <h4 style="margin-bottom: 0.5rem; cursor: pointer;" onclick="toggleFAQ(this)">How do I reset my password?</h4>
+        <div style="display: none; color: #666; margin-top: 1rem;">
+          Click "Forgot Password" on the login page, enter your email, and we'll send you a reset link within minutes.
+        </div>
+      </div>
+
+      <div class="card">
+        <h4 style="margin-bottom: 0.5rem; cursor: pointer;" onclick="toggleFAQ(this)">How can I delete my account?</h4>
+        <div style="display: none; color: #666; margin-top: 1rem;">
+          Go to your account settings and click "Delete Account". Your data will be permanently removed within 30 days.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h4>BigStudy</h4>
+          <p>India's leading platform for college exploration and entrance exam guidance.</p>
+        </div>
+        <div class="footer-section">
+          <h4>Quick Links</h4>
+          <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/pages/colleges/index.html">Colleges</a></li>
+            <li><a href="/pages/courses/index.html">Courses</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h4>Legal</h4>
+          <ul>
+            <li><a href="/pages/legal/privacy.html">Privacy Policy</a></li>
+            <li><a href="/pages/legal/terms.html">Terms & Conditions</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2025 BigStudy. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/public/js/utils.js"></script>
+  <script>
+    const contactForm = getElement('#contactForm');
+    
+    if (contactForm) {
+      contactForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const name = getElement('#name').value;
+        const email = getElement('#email').value;
+        const subject = getElement('#subject').value;
+        const message = getElement('#message').value;
+        
+        if (!name || !email || !subject || !message) {
+          showError('Please fill in all fields');
+          return;
+        }
+        
+        try {
+          const button = contactForm.querySelector('button[type="submit"]');
+          button.disabled = true;
+          showLoading(button);
+          
+          // Simulate sending
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+          showSuccess('Message sent successfully! We\'ll get back to you soon.');
+          contactForm.reset();
+          button.disabled = false;
+          hideLoading(button);
+        } catch (error) {
+          console.error('[v0] Error:', error);
+          showError('Failed to send message. Please try again.');
+          const button = contactForm.querySelector('button[type="submit"]');
+          button.disabled = false;
+          hideLoading(button);
+        }
+      });
+    }
+
+    function toggleFAQ(element) {
+      const answer = element.nextElementSibling;
+      if (answer.style.display === 'none') {
+        answer.style.display = 'block';
+        element.style.color = 'var(--primary)';
+      } else {
+        answer.style.display = 'none';
+        element.style.color = 'inherit';
+      }
+    }
+  </script>
+</body>
+</html>
